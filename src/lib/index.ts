@@ -5,14 +5,18 @@ type ImageSave = Partial<Konva.ImageConfig> & { type: "image" };
 
 type NodeSave = TextSave | ImageSave;
 
+const LAYER_MAIN = "main"
+const LAYER_WORK = "work"
+const TRANSFORMER = "transformer"
+
 export class State {
 	private nodes: NodeSave[] = [];
 	private stage: Konva.Stage;
-	private main_layer: Konva.Layer;
-	private work_layer: Konva.Layer;
+	private mainLayer: Konva.Layer;
+	private workLayer: Konva.Layer;
 
 	private transformer: Konva.Transformer;
-	private close: Konva.Circle;
+	private closeButton: CloseButton;
 
 	constructor(id?: string) {
 		this.stage = new Konva.Stage({
@@ -20,69 +24,45 @@ export class State {
 			width: 100,
 			height: 100,
 		});
-		this.main_layer = new Konva.Layer({ name: "main" });
-		this.work_layer = new Konva.Layer({ name: "work" });
-		this.stage.add(this.main_layer);
-		this.stage.add(this.work_layer);
+		this.mainLayer = new Konva.Layer({ name: LAYER_MAIN });
+		this.workLayer = new Konva.Layer({ name: LAYER_WORK });
+		this.stage.add(this.mainLayer);
+		this.stage.add(this.workLayer);
 
 		this.transformer = new Konva.Transformer({
-			padding: 5,
+			name: TRANSFORMER,
+			padding: 2,
 			flipEnabled: false,
 			rotateEnabled: false,
 			centeredScaling: true,
 		});
-		this.close = new Konva.Circle({
+		this.closeButton = new CloseButton({
 			name: "delete",
 			radius: 10,
 			fill: "red",
 			draggable: false,
+			visible: true,
 		});
-		this.work_layer.add(this.close);
-		this.work_layer.add(this.transformer);
+		this.workLayer.add(this.closeButton.getButton());
+		this.workLayer.add(this.transformer);
 	}
 	getStage() {return this.stage;}
 	public setTransformerEvent() {
 		this.transformer.on("transformer dragmove", (e) => {
-			const stage = e.target.getStage()!;
-			const children = this.work_layer.getChildren((e) => e.name() === "delete");
-			const delNode = children.at(0);
-			if (!delNode) {
-				return;
-			}
-			// refactor this somehow?
-			const x = this.transformer.getX() / stage.scaleX();
-			const y = this.transformer.getY() / stage.scaleY();
-			delNode.x(x - 15);
-			delNode.y(y - 15);
+			this.closeButton.updateDeletePosition();
 		});
 	}
 	public setStageClick() {
 		this.stage.on('click tap', (e) => {
 			const tr = this.transformer;
-			const stage = e.target.getStage()!;
-			const children = this.work_layer.getChildren((e) => e.name() === "delete");
-			const delNode = children.at(0);
-			if (!delNode) {
-				return;
-			}
-			// refactor this somehow?
-			const x = this.transformer.getX() / stage.scaleX();
-			const y = this.transformer.getY() / stage.scaleY();
-			delNode.x(x - 15);
-			delNode.y(y - 15);
-
-			// cleaner implementation of this?
 			if (["Image"].includes(e.target.getClassName())) {
-				delNode.hide();
+				this.closeButton.hide();
 				tr.nodes([]);
 				return;
 			}
 			if (["Circle"].includes(e.target.getClassName())) {
 				return;
 			}
-			// ISSUE: delete circle doesn't show up until the transformer gets moved
-			console.log("shown")
-			delNode.show();
 
 			const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
 			const isSelected = tr.nodes().indexOf(e.target) >= 0;
@@ -97,15 +77,18 @@ export class State {
 				const nodes = tr.nodes().concat([e.target]);
 				tr.nodes(nodes);
 			}
-			this.work_layer.draw();
+
+			this.closeButton.updateDeletePosition();
+			this.closeButton.show();
+			this.workLayer.draw();
 		});
 	}
 
 	public async loadImage(url: string) {
-		const work_layer_children = this.main_layer.getChildren(c => c.name() === "bg");
+		const work_layer_children = this.mainLayer.getChildren(c => c.name() === "bg");
 		const c = work_layer_children.at(0);
 		if (c) {
-			this.main_layer.clear();
+			this.mainLayer.clear();
 		}
 
 		const imagefn = new Promise<Konva.Image>((res, rej) => {
@@ -116,8 +99,8 @@ export class State {
 		this.stage.width(img.width());
 		this.stage.height(img.height());
 
-		this.main_layer.add(img);
-		this.main_layer.draw();
+		this.mainLayer.add(img);
+		this.mainLayer.draw();
 	}
 	public pushText(x: number, y: number) {
 		const txt = new Text({
@@ -127,15 +110,15 @@ export class State {
 			fontSize: 30,
 			draggable: true,
 			padding: 5,
-		});
+		}, this.closeButton);
 		txt.setBackgroundFill(255, 255, 255, 0.8);
-		this.main_layer.add(txt.getText());
+		this.mainLayer.add(txt.getText());
 	}
 }
 
 class Text {
 	private text: Konva.Text;
-	constructor(config: Konva.TextConfig) {
+	constructor(config: Konva.TextConfig, private closeButton: CloseButton) {
 		this.text = new Konva.Text(config);
 		this.on();
 	}
@@ -151,6 +134,10 @@ class Text {
 	}
 	private on() {
 		this.text.on("dblclick dbltap", (e) => this.doubleClick(e));
+		this.text.on("transform", (e) => this.transform(e));
+	}
+	private transform(e: Konva.KonvaEventObject<Konva.Text>) {
+		this.closeButton.updateDeletePosition();
 	}
 	private doubleClick(e: Konva.KonvaEventObject<Konva.Text>) {
 		const textNode = this.text;
@@ -161,7 +148,6 @@ class Text {
 		const areaPosition = {
 			x: stageBox.left + textPosition.x,
 			y: Math.abs(stageBox.top) - window.scrollY + textPosition.y,
-			// tried my best to account for small screens with big images.
 		};
 
 		const textarea = document.createElement('textarea');
@@ -187,4 +173,25 @@ class Text {
 			document.body.removeChild(textarea);
 		});
 	}
+}
+
+class CloseButton {
+	private closeButton: Konva.Circle;
+	constructor(config: Konva.CircleConfig) {
+		this.closeButton = new Konva.Circle(config);
+	}
+	public getButton() {
+		return this.closeButton;
+	}
+	public updateDeletePosition() {
+		const stage = this.closeButton.getStage()!;
+		const workLayer = stage.getLayers().filter(c => c.name() === LAYER_WORK)[0];
+		const tr = workLayer.getChildren(c => c.name() === TRANSFORMER)[0] as Konva.Transformer;
+		const x = tr.x() / stage.scaleX();
+		const y = tr.y() / stage.scaleY();
+		this.closeButton.x(x - 15);
+		this.closeButton.y(y - 15);
+	}
+	public show() { this.closeButton.show(); }
+	public hide() { this.closeButton.hide(); }
 }
