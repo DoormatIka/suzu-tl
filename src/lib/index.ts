@@ -10,7 +10,9 @@ export class State {
 	private stage: Konva.Stage;
 	private main_layer: Konva.Layer;
 	private work_layer: Konva.Layer;
+
 	private transformer: Konva.Transformer;
+	private close: Konva.Circle;
 
 	constructor(id?: string) {
 		this.stage = new Konva.Stage({
@@ -18,25 +20,70 @@ export class State {
 			width: 100,
 			height: 100,
 		});
-		this.main_layer = new Konva.Layer();
-		this.work_layer = new Konva.Layer();
+		this.main_layer = new Konva.Layer({ name: "main" });
+		this.work_layer = new Konva.Layer({ name: "work" });
 		this.stage.add(this.main_layer);
 		this.stage.add(this.work_layer);
 
 		this.transformer = new Konva.Transformer({
 			padding: 5,
 			flipEnabled: false,
+			rotateEnabled: false,
+			centeredScaling: true,
 		});
+		this.close = new Konva.Circle({
+			name: "delete",
+			radius: 10,
+			fill: "red",
+			draggable: false,
+		});
+		this.work_layer.add(this.close);
 		this.work_layer.add(this.transformer);
 	}
 	getStage() {return this.stage;}
+	public setTransformerEvent() {
+		this.transformer.on("transformer dragmove", (e) => {
+			const stage = e.target.getStage()!;
+			const children = this.work_layer.getChildren((e) => e.name() === "delete");
+			const delNode = children.at(0);
+			if (!delNode) {
+				return;
+			}
+			// refactor this somehow?
+			const x = this.transformer.getX() / stage.scaleX();
+			const y = this.transformer.getY() / stage.scaleY();
+			delNode.x(x - 15);
+			delNode.y(y - 15);
+		});
+	}
 	public setStageClick() {
 		this.stage.on('click tap', (e) => {
 			const tr = this.transformer;
-			if (e.target.getClassName() === "Image") {
+			const stage = e.target.getStage()!;
+			const children = this.work_layer.getChildren((e) => e.name() === "delete");
+			const delNode = children.at(0);
+			if (!delNode) {
+				return;
+			}
+			// refactor this somehow?
+			const x = this.transformer.getX() / stage.scaleX();
+			const y = this.transformer.getY() / stage.scaleY();
+			delNode.x(x - 15);
+			delNode.y(y - 15);
+
+			// cleaner implementation of this?
+			if (["Image"].includes(e.target.getClassName())) {
+				delNode.hide();
 				tr.nodes([]);
 				return;
 			}
+			if (["Circle"].includes(e.target.getClassName())) {
+				return;
+			}
+			// ISSUE: delete circle doesn't show up until the transformer gets moved
+			console.log("shown")
+			delNode.show();
+
 			const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
 			const isSelected = tr.nodes().indexOf(e.target) >= 0;
 
@@ -50,6 +97,7 @@ export class State {
 				const nodes = tr.nodes().concat([e.target]);
 				tr.nodes(nodes);
 			}
+			this.work_layer.draw();
 		});
 	}
 
