@@ -5,7 +5,8 @@
 A tool that will be used by SmallScans to place which translated text belongs in what speech bubble.
 
 ## Features
-- [ ] Adding/Editing/Deleting translation text 
+- [x] Adding/Editing/Deleting translation text 
+- [ ] Undo/Redo, history.
 - [ ] Hide/Show translation text, and change their opacity
 - [ ] Import single/multiple images
 - [ ] Basic folders for storing multiple images
