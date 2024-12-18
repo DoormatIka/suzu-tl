@@ -10,7 +10,7 @@ type ImageSave = Partial<Konva.ImageConfig> & { type: "image" };
 type NodeSave = TextSave | ImageSave;
 
 
-export class State {
+export class Orchestra {
 	private stage: Konva.Stage;
 	private mainLayer: Konva.Layer;
 	private workLayer: Konva.Layer;
