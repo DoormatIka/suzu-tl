@@ -8,6 +8,7 @@ type NodeSave = TextSave | ImageSave;
 const LAYER_MAIN = "main"
 const LAYER_WORK = "work"
 const TRANSFORMER = "transformer"
+const MAX_TEXT_WIDTH = 100;
 
 export class State {
 	private nodes: NodeSave[] = [];
@@ -34,7 +35,19 @@ export class State {
 			padding: 2,
 			flipEnabled: false,
 			rotateEnabled: false,
-			centeredScaling: true,
+			centeredScaling: false,
+			enabledAnchors: [
+        "top-center",
+        "middle-left",
+        "middle-right",
+        "bottom-center",
+			],
+			boundBoxFunc: (oldBox, newBox) => {
+				if (Math.abs(newBox.width) < MAX_TEXT_WIDTH) {
+					return oldBox;
+				}
+				return newBox;
+			},
 		});
 		this.closeButton = new CloseButton({
 			name: "delete",
@@ -48,9 +61,35 @@ export class State {
 	}
 	getStage() {return this.stage;}
 	public setTransformerEvent() {
-		this.transformer.on("transformer dragmove", (e) => {
+		this.transformer.on("dragmove", (e) => {
 			this.closeButton.updateDeletePosition();
 		});
+		this.transformer.on("transform", (e) => {
+			const nodes = this.transformer.nodes();
+      if (nodes.length === 1) {
+				const node = nodes[0] as Konva.Text;
+				const anchorName = this.transformer.getActiveAnchor();
+				const newScaleX = node.scaleX();
+				const newScaleY = node.scaleY();
+
+				if (anchorName === 'middle-left' || anchorName === 'middle-right') {
+					let newWidth = node.width() * newScaleX;
+					node.width(newWidth);
+					node.scaleX(1); 
+				} else if (anchorName === 'top-center' || anchorName === 'bottom-center') {
+					let newFontSize = node.fontSize() * newScaleY;
+					let newWidth = node.width() * newScaleY;
+					if (newWidth > MAX_TEXT_WIDTH) {
+						node.fontSize(newFontSize);
+						node.width(newWidth);
+					}
+
+					node.scaleX(1);
+					node.scaleY(1);
+				}
+				node.getLayer()?.batchDraw();
+      }
+		})
 	}
 	public setStageClick() {
 		this.stage.on('click tap', (e) => {
@@ -107,6 +146,7 @@ export class State {
 		const txt = new Text({
 			x: x,
 			y: y,
+			width: MAX_TEXT_WIDTH,
 			text: "Hello!",
 			fontSize: 30,
 			draggable: true,
