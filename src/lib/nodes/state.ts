@@ -10,7 +10,11 @@ export class State {
 	private currentState: Konva.NodeConfig[] = [];
 	private history: Konva.NodeConfig[][] = [];
 	private historyPointer: number = -1;
-	constructor() {}
+
+	constructor() {
+		this.saveStateToHistory([]);
+	}
+
 	public addNode(node: Konva.Node) {
 		this.currentState.push({...node.attrs});
 		this.saveStateToHistory(this.currentState.slice());
@@ -25,34 +29,52 @@ export class State {
 		this.currentState = this.currentState.filter((_, index) => index !== nodeIndex);
 		this.saveStateToHistory(this.currentState.slice());
 	}
-	private saveStateToHistory(state: Konva.ShapeConfig[]) {
-		this.history.push(state);
-		this.historyPointer++;
-	}
+    private saveStateToHistory(state: Konva.ShapeConfig[]) {
+        this.history = this.history.slice(0, this.historyPointer + 1);
+        this.history.push(state);
+        this.historyPointer = this.history.length - 1;
+        this.currentState = state.slice();
+    }
 
 	// issue: undo and redo overflows this.history;
 	// 		because of historyPointer
-	public undo() {
-		this.historyPointer--;
-		return this.history[this.historyPointer];
-	}
+    public undo() {
+        if (this.historyPointer > 0) {
+            this.historyPointer--;
+            this.currentState = this.history[this.historyPointer].slice();
+            return this.currentState;
+        }
+        return this.currentState;
+    }
+	public redo() {
+        if (this.historyPointer < this.history.length - 1) {
+            this.historyPointer++;
+            this.currentState = this.history[this.historyPointer].slice();
+            return this.currentState;
+        }
+        return this.currentState;
+    }
+
 	public getCurrentState() {
 		return this.history[this.historyPointer];
 	}
-	public redo() {
-		// returns index and currentState
-		this.historyPointer++;
-		return this.history[this.historyPointer];
-	}
+
 
 	public refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
+		if (!state || !Array.isArray(state)) {
+            console.warn('Invalid state provided to refreshStage');
+            return;
+        }
+
 		const layers = stage.children;
 		const mainLayerIndex = layers.findIndex(c => c.name() === LAYER_MAIN);
 		if (mainLayerIndex === -1) {
 			return;
 		}
+
 		const mainLayer = layers[mainLayerIndex];
-		mainLayer.clear(); // issue: mainLayer isn't getting cleared?
+        mainLayer.destroyChildren();
+
 		console.log(state);
 
 		for (const attr of state) {
@@ -66,6 +88,8 @@ export class State {
 					break;
 			}
 		}
+		mainLayer.batchDraw();
+
 	}
 	private createText(attrs: Object) {
 		const txt = new TextBox(attrs, this);
