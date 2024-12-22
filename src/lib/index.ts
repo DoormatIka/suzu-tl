@@ -1,11 +1,16 @@
 import Konva from "konva";
 import { v7 as uuidv7 } from "uuid";
 
-import {TextBox} from "./nodes/text";
-import {CloseButton} from "./nodes/closebutton";
-import {LAYER_MAIN, LAYER_WORK, TRANSFORMER, MAX_TEXT_WIDTH} from "./constants";
-import {TTransformer} from "./nodes/transformer";
-import {State} from "./nodes/state";
+import { TextBox } from "./nodes/text";
+import { CloseButton } from "./nodes/closebutton";
+import {
+	LAYER_MAIN,
+	LAYER_WORK,
+	TRANSFORMER,
+	MAX_TEXT_WIDTH,
+} from "./constants";
+import { TTransformer } from "./nodes/transformer";
+import { State } from "./nodes/state";
 
 export class Orchestra {
 	private stage: Konva.Stage;
@@ -29,13 +34,16 @@ export class Orchestra {
 
 		this.state = new State();
 
-		this.closeButton = new CloseButton({
-			name: "delete",
-			radius: 10,
-			fill: "red",
-			draggable: false,
-			visible: false,
-		}, this.state);
+		this.closeButton = new CloseButton(
+			{
+				name: "delete",
+				radius: 10,
+				fill: "red",
+				draggable: false,
+				visible: false,
+			},
+			this.state
+		);
 		this.transformer = new TTransformer(this.closeButton, {
 			name: TRANSFORMER,
 			padding: 2,
@@ -43,10 +51,10 @@ export class Orchestra {
 			rotateEnabled: false,
 			centeredScaling: false,
 			enabledAnchors: [
-        "top-center",
-        "middle-left",
-        "middle-right",
-        "bottom-center",
+				"top-center",
+				"middle-left",
+				"middle-right",
+				"bottom-center",
 			],
 			boundBoxFunc: (oldBox, newBox) => {
 				if (Math.abs(newBox.width) < MAX_TEXT_WIDTH) {
@@ -58,9 +66,11 @@ export class Orchestra {
 		this.workLayer.add(this.closeButton.getButton());
 		this.workLayer.add(this.transformer.getTransformer());
 	}
-	getStage() {return this.stage;}
+	getStage() {
+		return this.stage;
+	}
 	public setStageClick() {
-		this.stage.on('click tap', (e) => {
+		this.stage.on("click tap", (e) => {
 			const tr = this.transformer;
 			if (["Image"].includes(e.target.getClassName())) {
 				this.closeButton.hide();
@@ -92,7 +102,9 @@ export class Orchestra {
 	}
 
 	public async loadImage(url: string) {
-		const work_layer_children = this.mainLayer.getChildren(c => c.name() === "bg");
+		const work_layer_children = this.mainLayer.getChildren(
+			(c) => c.name() === "bg"
+		);
 		const c = work_layer_children.at(0);
 		if (c) {
 			this.mainLayer.clear();
@@ -111,16 +123,19 @@ export class Orchestra {
 		this.mainLayer.draw();
 	}
 	public pushText(x: number, y: number) {
-		const txt = new TextBox({
-			id: uuidv7(),
-			x: x,
-			y: y,
-			width: MAX_TEXT_WIDTH,
-			text: "Hello!",
-			fontSize: 30,
-			draggable: true,
-			padding: 5,
-		}, this.state);
+		const txt = new TextBox(
+			{
+				id: uuidv7(),
+				x: x,
+				y: y,
+				width: MAX_TEXT_WIDTH,
+				text: "Hello!",
+				fontSize: 30,
+				draggable: true,
+				padding: 5,
+			},
+			this.state
+		);
 		txt.setBackgroundFill(255, 255, 255, 0.8);
 		const konvaTxt = txt.getText();
 		this.mainLayer.add(konvaTxt);
@@ -135,4 +150,3 @@ export class Orchestra {
 		this.state.refreshStage(this.stage, s);
 	}
 }
-

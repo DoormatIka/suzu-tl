@@ -1,12 +1,14 @@
-
 import Konva from "konva";
-import type {CloseButton} from "./closebutton";
-import {MAX_TEXT_WIDTH} from "$lib/constants";
-import type {State} from "./state";
+import type { CloseButton } from "./closebutton";
+import { MAX_TEXT_WIDTH } from "$lib/constants";
+import type { State } from "./state";
 
 export class TTransformer {
 	private transformer: Konva.Transformer;
-	constructor(private closeButton: CloseButton, config?: Konva.TransformerConfig) {
+	constructor(
+		private closeButton: CloseButton,
+		config?: Konva.TransformerConfig
+	) {
 		this.transformer = new Konva.Transformer(config);
 		this.on();
 	}
@@ -37,11 +39,14 @@ export class TTransformer {
 			const newScaleX = node.scaleX();
 			const newScaleY = node.scaleY();
 
-			if (anchorName === 'middle-left' || anchorName === 'middle-right') {
+			if (anchorName === "middle-left" || anchorName === "middle-right") {
 				let newWidth = node.width() * newScaleX;
 				node.width(newWidth);
-				node.scaleX(1); 
-			} else if (anchorName === 'top-center' || anchorName === 'bottom-center') {
+				node.scaleX(1);
+			} else if (
+				anchorName === "top-center" ||
+				anchorName === "bottom-center"
+			) {
 				let newFontSize = node.fontSize() * newScaleY;
 				let newWidth = node.width() * newScaleY;
 				if (newWidth > MAX_TEXT_WIDTH) {

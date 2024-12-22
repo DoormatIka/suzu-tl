@@ -1,10 +1,10 @@
-import {LAYER_MAIN} from "$lib/constants";
+import { LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
-import {TextBox} from "./text";
+import { TextBox } from "./text";
 
 /**
-	* Handles the state and history of the Orchestra.
-	*/
+ * Handles the state and history of the Orchestra.
+ */
 export class State {
 	// currentState => history[]
 	private currentState: Konva.NodeConfig[] = [];
@@ -16,64 +16,65 @@ export class State {
 	}
 
 	public addNode(node: Konva.Node) {
-		this.currentState.push({...node.attrs});
+		this.currentState.push({ ...node.attrs });
 		this.saveStateToHistory(this.currentState.slice());
 	}
 	public updateNode(node: Konva.Node) {
-		const nodeIndex = this.currentState.findIndex(c => c.id === node.id());
-		this.currentState[nodeIndex] = {...node.attrs};
+		const nodeIndex = this.currentState.findIndex((c) => c.id === node.id());
+		this.currentState[nodeIndex] = { ...node.attrs };
 		this.saveStateToHistory(this.currentState.slice());
 	}
 	public deleteNode(node: Konva.Node) {
-		const nodeIndex = this.currentState.findIndex(c => c.id === node.id());
-		this.currentState = this.currentState.filter((_, index) => index !== nodeIndex);
+		const nodeIndex = this.currentState.findIndex((c) => c.id === node.id());
+		this.currentState = this.currentState.filter(
+			(_, index) => index !== nodeIndex
+		);
 		this.saveStateToHistory(this.currentState.slice());
 	}
-    private saveStateToHistory(state: Konva.ShapeConfig[]) {
-        this.history = this.history.slice(0, this.historyPointer + 1);
-        this.history.push(state);
-        this.historyPointer = this.history.length - 1;
-        this.currentState = state.slice();
-    }
+	private saveStateToHistory(state: Konva.ShapeConfig[]) {
+		this.history = this.history.slice(0, this.historyPointer + 1);
+		this.history.push(state);
+		this.historyPointer = this.history.length - 1;
+		this.currentState = state.slice();
+	}
 
 	// issue: undo and redo overflows this.history;
 	// 		because of historyPointer
-    public undo() {
-        if (this.historyPointer > 0) {
-            this.historyPointer--;
-            this.currentState = this.history[this.historyPointer].slice();
-            return this.currentState;
-        }
-        return this.currentState;
-    }
+	public undo() {
+		if (this.historyPointer > 0) {
+			this.historyPointer--;
+			this.currentState = this.history[this.historyPointer].slice();
+			return this.currentState;
+		}
+		return this.currentState;
+	}
 	public redo() {
-        if (this.historyPointer < this.history.length - 1) {
-            this.historyPointer++;
-            this.currentState = this.history[this.historyPointer].slice();
-            return this.currentState;
-        }
-        return this.currentState;
-    }
+		if (this.historyPointer < this.history.length - 1) {
+			this.historyPointer++;
+			this.currentState = this.history[this.historyPointer].slice();
+			return this.currentState;
+		}
+		return this.currentState;
+	}
 
 	public getCurrentState() {
 		return this.history[this.historyPointer];
 	}
 
-
 	public refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
 		if (!state || !Array.isArray(state)) {
-            console.warn('Invalid state provided to refreshStage');
-            return;
-        }
+			console.warn("Invalid state provided to refreshStage");
+			return;
+		}
 
 		const layers = stage.children;
-		const mainLayerIndex = layers.findIndex(c => c.name() === LAYER_MAIN);
+		const mainLayerIndex = layers.findIndex((c) => c.name() === LAYER_MAIN);
 		if (mainLayerIndex === -1) {
 			return;
 		}
 
 		const mainLayer = layers[mainLayerIndex];
-        mainLayer.destroyChildren();
+		mainLayer.destroyChildren();
 
 		console.log(state);
 
@@ -89,7 +90,6 @@ export class State {
 			}
 		}
 		mainLayer.batchDraw();
-
 	}
 	private createText(attrs: Object) {
 		const txt = new TextBox(attrs, this);

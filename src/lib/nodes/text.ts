@@ -1,11 +1,11 @@
 import Konva from "konva";
-import type {State} from "./state";
+import type { State } from "./state";
 
 export class TextBox {
 	private text: Konva.Text;
 
 	constructor(config: Konva.TextConfig, private state: State) {
-		this.text = new Konva.Text({name: "text", ...config});
+		this.text = new Konva.Text({ name: "text", ...config });
 		this.on();
 	}
 	public getText() {
@@ -33,13 +33,13 @@ export class TextBox {
 			y: Math.abs(stageBox.top) - window.scrollY + textPosition.y,
 		};
 
-		const textarea = document.createElement('textarea');
+		const textarea = document.createElement("textarea");
 		document.body.appendChild(textarea);
 
 		textarea.value = textNode.text();
-		textarea.style.position = 'absolute';
-		textarea.style.left = areaPosition.x + 'px';
-		textarea.style.top = areaPosition.y + 'px';
+		textarea.style.position = "absolute";
+		textarea.style.left = areaPosition.x + "px";
+		textarea.style.top = areaPosition.y + "px";
 		textarea.style.width = textNode.width().toString();
 		textarea.style.fontSize = `${textNode.fontSize()}px`;
 
