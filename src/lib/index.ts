@@ -1,14 +1,11 @@
 import Konva from "konva";
+import { v7 as uuidv7 } from "uuid";
+
 import {TextBox} from "./nodes/text";
 import {CloseButton} from "./nodes/closebutton";
 import {LAYER_MAIN, LAYER_WORK, TRANSFORMER, MAX_TEXT_WIDTH} from "./constants";
 import {TTransformer} from "./nodes/transformer";
-
-type TextSave = Partial<Konva.TextConfig> & { type: "text" };
-type ImageSave = Partial<Konva.ImageConfig> & { type: "image" };
-
-type NodeSave = TextSave | ImageSave;
-
+import {State} from "./nodes/state";
 
 export class Orchestra {
 	private stage: Konva.Stage;
@@ -17,6 +14,7 @@ export class Orchestra {
 
 	private transformer: TTransformer;
 	private closeButton: CloseButton;
+	private state: State;
 
 	constructor(id?: string) {
 		this.stage = new Konva.Stage({
@@ -29,13 +27,15 @@ export class Orchestra {
 		this.stage.add(this.mainLayer);
 		this.stage.add(this.workLayer);
 
+		this.state = new State();
+
 		this.closeButton = new CloseButton({
 			name: "delete",
 			radius: 10,
 			fill: "red",
 			draggable: false,
 			visible: false,
-		});
+		}, this.state);
 		this.transformer = new TTransformer(this.closeButton, {
 			name: TRANSFORMER,
 			padding: 2,
@@ -112,6 +112,7 @@ export class Orchestra {
 	}
 	public pushText(x: number, y: number) {
 		const txt = new TextBox({
+			id: uuidv7(),
 			x: x,
 			y: y,
 			width: MAX_TEXT_WIDTH,
@@ -119,9 +120,19 @@ export class Orchestra {
 			fontSize: 30,
 			draggable: true,
 			padding: 5,
-		}, this.closeButton);
+		}, this.state);
 		txt.setBackgroundFill(255, 255, 255, 0.8);
-		this.mainLayer.add(txt.getText());
+		const konvaTxt = txt.getText();
+		this.mainLayer.add(konvaTxt);
+		this.state.addNode(konvaTxt);
+	}
+	public undo() {
+		const s = this.state.undo();
+		this.state.refreshStage(this.stage, s);
+	}
+	public redo() {
+		const s = this.state.redo();
+		this.state.refreshStage(this.stage, s);
 	}
 }
 

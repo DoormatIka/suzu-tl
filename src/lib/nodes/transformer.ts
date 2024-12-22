@@ -2,6 +2,7 @@
 import Konva from "konva";
 import type {CloseButton} from "./closebutton";
 import {MAX_TEXT_WIDTH} from "$lib/constants";
+import type {State} from "./state";
 
 export class TTransformer {
 	private transformer: Konva.Transformer;
@@ -53,5 +54,6 @@ export class TTransformer {
 			}
 			node.getLayer()?.batchDraw();
 		}
+		this.closeButton.updateDeletePosition();
 	}
 }

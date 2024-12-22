@@ -1,10 +1,11 @@
 import Konva from "konva";
-import {CloseButton} from "./closebutton";
+import type {State} from "./state";
 
 export class TextBox {
 	private text: Konva.Text;
-	constructor(config: Konva.TextConfig, private closeButton: CloseButton) {
-		this.text = new Konva.Text(config);
+
+	constructor(config: Konva.TextConfig, private state: State) {
+		this.text = new Konva.Text({name: "text", ...config});
 		this.on();
 	}
 	public getText() {
@@ -19,10 +20,7 @@ export class TextBox {
 	}
 	private on() {
 		this.text.on("dblclick dbltap", (e) => this.doubleClick(e));
-		this.text.on("transform", (e) => this.transform(e));
-	}
-	private transform(e: Konva.KonvaEventObject<Konva.Text>) {
-		this.closeButton.updateDeletePosition();
+		this.text.on("dragend", (e) => this.state.updateNode(this.text));
 	}
 	private doubleClick(e: Konva.KonvaEventObject<Konva.Text>) {
 		const textNode = this.text;
@@ -55,6 +53,7 @@ export class TextBox {
 
 		textarea.addEventListener("blur", () => {
 			textNode.text(textarea.value);
+			this.state.updateNode(textNode);
 			document.body.removeChild(textarea);
 		});
 	}

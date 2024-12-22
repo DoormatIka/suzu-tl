@@ -19,6 +19,12 @@
       await state.loadImage(img_link.toString())
     }
   }
+  function undo() {
+    state.undo();
+  }
+  function redo() {
+    state.redo();
+  }
 </script>
 
 <div>
@@ -27,5 +33,7 @@
     <button type="submit">Submit</button>
   </form>
 </div>
+<button on:click={undo}>Undo</button>
+<button on:click={redo}>Redo</button>
 <button on:click={() => { state.pushText(0, 0); }}>Add</button>
 <div id="container"></div>

@@ -1,34 +1,75 @@
-import type Konva from "konva";
+import {LAYER_MAIN} from "$lib/constants";
+import Konva from "konva";
+import {TextBox} from "./text";
 
 /**
 	* Handles the state and history of the Orchestra.
 	*/
 export class State {
 	// currentState => history[]
-	private currentState: Object[] = [];
-	private history: Object[][] = [];
-	private currentPointer: number = 0;
+	private currentState: Konva.NodeConfig[] = [];
+	private history: Konva.NodeConfig[][] = [];
+	private historyPointer: number = -1;
 	constructor() {}
-	public addNode(node: Konva.Shape) {
-		// add to node attributes.
-		// should call saveStateToHistory here.
+	public addNode(node: Konva.Node) {
+		this.currentState.push({...node.attrs});
+		this.saveStateToHistory(this.currentState.slice());
 	}
-	public updateNode(node: Konva.Shape) {
-		// update node attributes on currentState.
-		// should call saveStateToHistory here.
+	public updateNode(node: Konva.Node) {
+		const nodeIndex = this.currentState.findIndex(c => c.id === node.id());
+		this.currentState[nodeIndex] = {...node.attrs};
+		this.saveStateToHistory(this.currentState.slice());
 	}
-	public saveStateToHistory() {
-		// copy every node's attributes into the currentState array
-		// push that into history.
-		//
-		// there are smarter ways to do this like only
-		// 		updating what changed.
-		// id maybe?
+	public deleteNode(node: Konva.Node) {
+		const nodeIndex = this.currentState.findIndex(c => c.id === node.id());
+		this.currentState = this.currentState.filter((_, index) => index !== nodeIndex);
+		this.saveStateToHistory(this.currentState.slice());
 	}
+	private saveStateToHistory(state: Konva.ShapeConfig[]) {
+		this.history.push(state);
+		this.historyPointer++;
+	}
+
+	// issue: undo and redo overflows this.history;
+	// 		because of historyPointer
 	public undo() {
-		// returns index and currentState
+		this.historyPointer--;
+		return this.history[this.historyPointer];
+	}
+	public getCurrentState() {
+		return this.history[this.historyPointer];
 	}
 	public redo() {
 		// returns index and currentState
+		this.historyPointer++;
+		return this.history[this.historyPointer];
+	}
+
+	public refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
+		const layers = stage.children;
+		const mainLayerIndex = layers.findIndex(c => c.name() === LAYER_MAIN);
+		if (mainLayerIndex === -1) {
+			return;
+		}
+		const mainLayer = layers[mainLayerIndex];
+		mainLayer.clear(); // issue: mainLayer isn't getting cleared?
+		console.log(state);
+
+		for (const attr of state) {
+			switch (attr.name) {
+				case "text": {
+					const txt = this.createText(attr);
+					mainLayer.add(txt.getText());
+					break;
+				}
+				default:
+					break;
+			}
+		}
+	}
+	private createText(attrs: Object) {
+		const txt = new TextBox(attrs, this);
+		txt.setBackgroundFill(255, 255, 255, 0.8);
+		return txt;
 	}
 }
