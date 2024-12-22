@@ -25,6 +25,12 @@
   function redo() {
     state.redo();
   }
+  function zoomIn() {
+    state.zoomIn();
+  }
+  function zoomOut() {
+    state.zoomOut();
+  }
 </script>
 
 <div>
@@ -35,5 +41,7 @@
 </div>
 <button on:click={undo}>Undo</button>
 <button on:click={redo}>Redo</button>
+<button on:click={zoomIn}>Zoom +</button>
+<button on:click={zoomOut}>Zoom -</button>
 <button on:click={() => { state.pushText(0, 0); }}>Add</button>
-<div id="container"></div>
+<div id="container" style="border: dotted; width: fit-content;"></div>

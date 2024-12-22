@@ -1,12 +1,12 @@
 import { LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
+import {loadImage} from "./img";
 
 /**
  * Handles the state and history of the Orchestra.
  */
 export class State {
-	// currentState => history[]
 	private currentState: Konva.NodeConfig[] = [];
 	private history: Konva.NodeConfig[][] = [];
 	private historyPointer: number = -1;
@@ -38,8 +38,6 @@ export class State {
 		this.currentState = state.slice();
 	}
 
-	// issue: undo and redo overflows this.history;
-	// 		because of historyPointer
 	public undo() {
 		if (this.historyPointer > 0) {
 			this.historyPointer--;
@@ -61,7 +59,7 @@ export class State {
 		return this.history[this.historyPointer];
 	}
 
-	public refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
+	public async refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
 		if (!state || !Array.isArray(state)) {
 			console.warn("Invalid state provided to refreshStage");
 			return;
@@ -76,13 +74,19 @@ export class State {
 		const mainLayer = layers[mainLayerIndex];
 		mainLayer.destroyChildren();
 
-		console.log(state);
-
 		for (const attr of state) {
 			switch (attr.name) {
 				case "text": {
 					const txt = this.createText(attr);
 					mainLayer.add(txt.getText());
+					break;
+				}
+				case "bg": {
+					const url: string = attr.image.src;
+					const img = await loadImage(url);
+					stage.width(img.width());
+					stage.height(img.height());
+					mainLayer.add(img);
 					break;
 				}
 				default:

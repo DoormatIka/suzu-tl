@@ -11,6 +11,7 @@ import {
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
 import { State } from "./nodes/state";
+import {loadImage} from "./nodes/img";
 
 export class Orchestra {
 	private stage: Konva.Stage;
@@ -77,7 +78,7 @@ export class Orchestra {
 				tr.nodes([]);
 				return;
 			}
-			if (["Circle"].includes(e.target.getClassName())) {
+			if (["Circle", "Stage"].includes(e.target.getClassName())) {
 				return;
 			}
 
@@ -111,16 +112,15 @@ export class Orchestra {
 			this.transformer.nodes([]);
 		}
 
-		const imagefn = new Promise<Konva.Image>((res, rej) => {
-			Konva.Image.fromURL(url, res, rej);
-		});
-		const img = await imagefn;
-		img.name("bg");
+		const img = await loadImage(url);
+
 		this.stage.width(img.width());
 		this.stage.height(img.height());
 
 		this.mainLayer.add(img);
 		this.mainLayer.draw();
+
+		this.state.addNode(img);
 	}
 	public pushText(x: number, y: number) {
 		const txt = new TextBox(
@@ -144,9 +144,39 @@ export class Orchestra {
 	public undo() {
 		const s = this.state.undo();
 		this.state.refreshStage(this.stage, s);
+		this.transformer.nodes([]);
+		this.closeButton.hide();
 	}
 	public redo() {
 		const s = this.state.redo();
 		this.state.refreshStage(this.stage, s);
+		this.transformer.nodes([]);
+		this.closeButton.hide();
+	}
+	public zoomIn() {
+		const maxScale = 1.5; // Define a maximum zoom level
+    const scaleX = Math.min(this.stage.scaleX() + 0.1, maxScale);
+		this.stage.scaleX(scaleX);
+		this.stage.scaleY(scaleX);
+
+		/*
+		const oldScale = this.stage.scale()!;
+		this.stage.width(this.stage.width() * oldScale.x);
+		this.stage.height(this.stage.height() * oldScale.y);
+		this.stage.scale({ x: oldScale.x + 0.1, y: oldScale.y + 0.1 });
+		*/
+	}
+	public zoomOut() {
+		const minScale = 0.1; // Define a minimum zoom level
+    const scaleX = Math.max(this.stage.scaleX() - 0.1, minScale);
+		this.stage.scaleX(scaleX);
+		this.stage.scaleY(scaleX);
+
+		/*
+		const oldScale = this.stage.scale()!;
+		this.stage.width(this.stage.width() * oldScale.x);
+		this.stage.height(this.stage.height() * oldScale.y);
+		this.stage.scale({ x: oldScale.x - 0.1, y: oldScale.y - 0.1 });
+		*/
 	}
 }
