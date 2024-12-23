@@ -6,7 +6,8 @@ A tool that will be used by SmallScans to place which translated text belongs in
 
 ## Features
 - [x] Adding/Editing/Deleting translation text 
-- [ ] Undo/Redo, history.
+- [x] Undo/Redo, history.
+- [ ] ~ Zooming.
 - [ ] Hide/Show translation text, and change their opacity
 - [ ] Import single/multiple images
 - [ ] Basic folders for storing multiple images

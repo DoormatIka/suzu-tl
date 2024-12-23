@@ -154,29 +154,24 @@ export class Orchestra {
 		this.closeButton.hide();
 	}
 	public zoomIn() {
-		const maxScale = 1.5; // Define a maximum zoom level
-    const scaleX = Math.min(this.stage.scaleX() + 0.1, maxScale);
+		const maxScale = 1; // Define a maximum zoom level
+    const scaleX = Math.min(precisionRoundMod(this.stage.scaleX() + 0.1, 1), maxScale);
 		this.stage.scaleX(scaleX);
 		this.stage.scaleY(scaleX);
-
-		/*
-		const oldScale = this.stage.scale()!;
-		this.stage.width(this.stage.width() * oldScale.x);
-		this.stage.height(this.stage.height() * oldScale.y);
-		this.stage.scale({ x: oldScale.x + 0.1, y: oldScale.y + 0.1 });
-		*/
 	}
 	public zoomOut() {
 		const minScale = 0.1; // Define a minimum zoom level
-    const scaleX = Math.max(this.stage.scaleX() - 0.1, minScale);
+    const scaleX = Math.max(precisionRoundMod(this.stage.scaleX() - 0.1, 1), minScale);
 		this.stage.scaleX(scaleX);
 		this.stage.scaleY(scaleX);
-
-		/*
-		const oldScale = this.stage.scale()!;
-		this.stage.width(this.stage.width() * oldScale.x);
-		this.stage.height(this.stage.height() * oldScale.y);
-		this.stage.scale({ x: oldScale.x - 0.1, y: oldScale.y - 0.1 });
-		*/
 	}
+	public getScale() {
+		return this.stage.scaleX();
+	}
+}
+
+function precisionRoundMod(n: number, precision: number) {
+  var factor = Math.pow(10, precision);
+  var n = precision < 0 ? n : 0.01 / factor + n;
+  return Math.round(n * factor) / factor;
 }
