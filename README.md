@@ -7,11 +7,9 @@ A tool that will be used by SmallScans to place which translated text belongs in
 ## Features
 - [x] Adding/Editing/Deleting translation text 
 - [x] Undo/Redo, history.
-- [ ] ~ Zooming.
-- [ ] Hide/Show translation text, and change their opacity
-- [ ] Import single/multiple images
-- [ ] Basic folders for storing multiple images
-- [ ] Export image/folders to a .suzu file format
+- [ ] ~ Zooming. (works kind of?)
+- [ ] Support single/multiple images in a folder structure (in progress)
+- [ ] Import/Export image/folder to a .suzu file format
 - [ ] Responsive layout for different sized screens
 - [ ] UI Design, making the UI look pretty
 - [ ] Server storage
