@@ -1,4 +1,4 @@
-import { LAYER_MAIN } from "$lib/constants";
+import { DEFAULT_TEXT_CONFIG, LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
 import {loadImage} from "./img";
@@ -75,6 +75,7 @@ export class State {
 	public getCurrentState(): NodeConfig[] {
 		return this.history[this.historyPointer];
 	}
+
 	public async saveStateToJSON() {
 		const state = this.getCurrentState();
 		const parsedState: SaveNode[] = [];
@@ -109,19 +110,20 @@ export class State {
 		throw new Error("Unknown type found!");
 	}
 
-	public loadStateFromJSON(nodes: any[]) {
-		this.currentState.length = 0;
-		this.history.length = 0;
+	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
+		this.currentState.splice(0, this.currentState.length);
+		this.history.splice(0, this.history.length);
 		this.historyPointer = 0;
 
 		for (const node of nodes) {
-			this.currentState.push(this.parseNode(node));
+			this.currentState.push(await this.parseNode(node));
 		}
+		this.refreshStage(stage, this.currentState);
 	}
 	private async parseNode(node: SaveNode): Promise<Konva.ImageConfig | Konva.TextConfig> {
 		if (node.type === "bg") {
 			const img = node as SaveBG;
-			const elem = new HTMLImageElement(); // issue: illegal constructor.
+			const elem = new Image(img.width, img.height);
 			elem.src = structuredClone(node.src);
 			
 			return {
@@ -135,8 +137,8 @@ export class State {
 		}
 		if (node.type === "text") {
 			const text = node as SaveText;
-			// TODO: text elements.
 			return {
+				...DEFAULT_TEXT_CONFIG,
 				"name": "text",
 				"x": text.x!,
 				"y": text.y!,

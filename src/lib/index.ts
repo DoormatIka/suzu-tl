@@ -8,6 +8,7 @@ import {
 	LAYER_WORK,
 	TRANSFORMER,
 	MAX_TEXT_WIDTH,
+	DEFAULT_TEXT_CONFIG,
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
 import { State } from "./nodes/state";
@@ -125,14 +126,10 @@ export class Orchestra {
 	public pushText(x: number, y: number) {
 		const txt = new TextBox(
 			{
+				...DEFAULT_TEXT_CONFIG,
 				id: uuidv7(),
 				x: x,
 				y: y,
-				width: MAX_TEXT_WIDTH,
-				text: "Hello!",
-				fontSize: 30,
-				draggable: true,
-				padding: 5,
 			},
 			this.state
 		);
@@ -169,9 +166,9 @@ export class Orchestra {
 		return this.stage.scaleX();
 	}
 
-	public load(str: string) {
+	public async load(str: string) {
 		const j = JSON.parse(str);
-		return this.state.loadStateFromJSON(j);
+		return await this.state.loadStateFromJSON(this.stage, j);
 	}
 	public save() {
 		return this.state.saveStateToJSON();

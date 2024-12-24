@@ -25,8 +25,8 @@
   async function save() {
     saveContent = await state.save();
   }
-  function load() {
-    state.load(saveContent);
+  async function load() {
+    await state.load(saveContent);
   }
   function undo() {
     state.undo();
