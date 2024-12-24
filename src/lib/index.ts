@@ -168,6 +168,14 @@ export class Orchestra {
 	public getScale() {
 		return this.stage.scaleX();
 	}
+
+	public load(str: string) {
+		const j = JSON.parse(str);
+		return this.state.loadStateFromJSON(j);
+	}
+	public save() {
+		return this.state.saveStateToJSON();
+	}
 }
 
 function precisionRoundMod(n: number, precision: number) {

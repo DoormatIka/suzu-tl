@@ -30,7 +30,7 @@ export class TextBox {
 
 		const areaPosition = {
 			x: stageBox.left + textPosition.x,
-			y: Math.abs(stageBox.top) - window.scrollY + textPosition.y,
+			y: Math.abs(stageBox.top) + window.scrollY + textPosition.y,
 		};
 
 		const textarea = document.createElement("textarea");

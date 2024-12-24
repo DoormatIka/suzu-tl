@@ -3,6 +3,7 @@
   import {onMount} from "svelte";
   let state: Orchestra;
   let scale = 0;
+  let saveContent = "";
 
   onMount(async () => {
     state = new Orchestra();
@@ -20,6 +21,12 @@
     if (img_link) {
       await state.loadImage(img_link.toString())
     }
+  }
+  async function save() {
+    saveContent = await state.save();
+  }
+  function load() {
+    state.load(saveContent);
   }
   function undo() {
     state.undo();
@@ -61,5 +68,11 @@
 </div>
 
 <br>
+
+<div style="align-items: center; flex-direction: row; display: flex; width: 20rem">
+  <textarea style="flex-grow: 1;" name="save" id="save">{saveContent}</textarea>
+  <button on:click={save} style="height: 100%;">Save</button>
+  <button on:click={load} style="height: 100%;">Load</button>
+</div>
 
 <div id="container" style="border: dotted; width: fit-content;"></div>

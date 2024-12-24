@@ -2,6 +2,23 @@ import { LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
 import {loadImage} from "./img";
+import type {NodeConfig} from "konva/lib/Node";
+
+type SaveNode = SaveText | SaveBG;
+type SaveText = {
+	type: "text"
+	x: number,
+	y: number,
+	width: number,
+	text: string,
+	fontSize: number,
+};
+type SaveBG = {
+	type: "bg",
+	src: string,
+	width: number,
+	height: number,
+};
 
 /**
  * Handles the state and history of the Orchestra.
@@ -55,8 +72,80 @@ export class State {
 		return this.currentState;
 	}
 
-	public getCurrentState() {
+	public getCurrentState(): NodeConfig[] {
 		return this.history[this.historyPointer];
+	}
+	public async saveStateToJSON() {
+		const state = this.getCurrentState();
+		const parsedState: SaveNode[] = [];
+
+		for (const node of state) {
+			const p = await this.stringifyNode(node);
+			parsedState.push(p);
+		}
+		return JSON.stringify(parsedState, undefined, 2);
+	}
+	private async stringifyNode(node: Konva.ImageConfig | Konva.TextConfig): Promise<SaveNode> {
+		if (node.image) {
+			const img = node as Konva.ImageConfig;
+			return {
+				"type": "bg",
+				"width": img.width!,
+				"height": img.height!,
+				"src": node.image.src,
+			};
+		}
+		if (node.text) {
+			const text = node as Konva.TextConfig;
+			return {
+				"type": "text",
+				"x": text.x!,
+				"y": text.y!,
+				"text": text.text!,
+				"width": text.width!,
+				"fontSize": text.fontSize!,
+			};
+		}
+		throw new Error("Unknown type found!");
+	}
+
+	public loadStateFromJSON(nodes: any[]) {
+		this.currentState.length = 0;
+		this.history.length = 0;
+		this.historyPointer = 0;
+
+		for (const node of nodes) {
+			this.currentState.push(this.parseNode(node));
+		}
+	}
+	private async parseNode(node: SaveNode): Promise<Konva.ImageConfig | Konva.TextConfig> {
+		if (node.type === "bg") {
+			const img = node as SaveBG;
+			const elem = new HTMLImageElement(); // issue: illegal constructor.
+			elem.src = structuredClone(node.src);
+			
+			return {
+				"name": "bg",
+				"x": 0,
+				"y": 0,
+				"image": elem,
+				"width": img.width!,
+				"height": img.height!,
+			};
+		}
+		if (node.type === "text") {
+			const text = node as SaveText;
+			// TODO: text elements.
+			return {
+				"name": "text",
+				"x": text.x!,
+				"y": text.y!,
+				"text": text.text!,
+				"width": text.width!,
+				"fontSize": text.fontSize!,
+			};
+		}
+		throw new Error("Unknown type found!");
 	}
 
 	public async refreshStage(stage: Konva.Stage, state: Konva.ShapeConfig[]) {
@@ -101,3 +190,4 @@ export class State {
 		return txt;
 	}
 }
+
