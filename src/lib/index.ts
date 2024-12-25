@@ -7,7 +7,7 @@ import {
 	LAYER_MAIN,
 	LAYER_WORK,
 	TRANSFORMER,
-	MAX_TEXT_WIDTH,
+	MIN_TEXT_WIDTH,
 	DEFAULT_TEXT_CONFIG,
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
@@ -59,7 +59,11 @@ export class Orchestra {
 				"bottom-center",
 			],
 			boundBoxFunc: (oldBox, newBox) => {
-				if (Math.abs(newBox.width) < MAX_TEXT_WIDTH) {
+				const t = this.transformer.getTransformer();
+				const stage = t.getStage()!;
+				console.log(stage.scaleX());
+				
+				if (Math.abs(newBox.width) < MIN_TEXT_WIDTH * stage.scaleX()) {
 					return oldBox;
 				}
 				return newBox;
@@ -72,6 +76,12 @@ export class Orchestra {
 		return this.stage;
 	}
 	public setStageClick() {
+		this.stage.on("dblclick dbltap", (e) => {
+			if (["Text", "Circle", "Stage"].includes(e.target.getClassName())) {
+				return;
+			}
+			this.pushText(e.evt.layerX, e.evt.layerY);
+		});
 		this.stage.on("click tap", (e) => {
 			const tr = this.transformer;
 			if (["Image"].includes(e.target.getClassName())) {
