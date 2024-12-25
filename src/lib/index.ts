@@ -12,7 +12,7 @@ import {
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
 import { State } from "./nodes/state";
-import {loadImage} from "./nodes/img";
+import {loadKonvaImageFromURL} from "./nodes/img";
 
 export class Orchestra {
 	private stage: Konva.Stage;
@@ -113,7 +113,7 @@ export class Orchestra {
 			this.transformer.nodes([]);
 		}
 
-		const img = await loadImage(url);
+		const img = await loadKonvaImageFromURL(url);
 
 		this.stage.width(img.width());
 		this.stage.height(img.height());
@@ -121,7 +121,7 @@ export class Orchestra {
 		this.mainLayer.add(img);
 		this.mainLayer.draw();
 
-		this.state.addNode(img);
+		this.state.updateNode(img);
 	}
 	public pushText(x: number, y: number) {
 		const txt = new TextBox(

@@ -1,7 +1,7 @@
 import { DEFAULT_TEXT_CONFIG, LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
-import {loadImage} from "./img";
+import {loadKonvaImageFromBase64, loadKonvaImageFromURL} from "./img";
 import type {NodeConfig} from "konva/lib/Node";
 
 type SaveNode = SaveText | SaveBG;
@@ -38,8 +38,12 @@ export class State {
 	}
 	public updateNode(node: Konva.Node) {
 		const nodeIndex = this.currentState.findIndex((c) => c.id === node.id());
-		this.currentState[nodeIndex] = { ...node.attrs };
-		this.saveStateToHistory(this.currentState.slice());
+		if (nodeIndex === -1) {
+			this.addNode(node);
+		} else {
+			this.currentState[nodeIndex] = { ...node.attrs };
+			this.saveStateToHistory(this.currentState.slice());
+		}
 	}
 	public deleteNode(node: Konva.Node) {
 		const nodeIndex = this.currentState.findIndex((c) => c.id === node.id());
@@ -56,6 +60,7 @@ export class State {
 	}
 
 	public undo() {
+		console.log("undo", this.currentState);
 		if (this.historyPointer > 0) {
 			this.historyPointer--;
 			this.currentState = this.history[this.historyPointer].slice();
@@ -64,6 +69,7 @@ export class State {
 		return this.currentState;
 	}
 	public redo() {
+		console.log("redo", this.currentState);
 		if (this.historyPointer < this.history.length - 1) {
 			this.historyPointer++;
 			this.currentState = this.history[this.historyPointer].slice();
@@ -80,6 +86,7 @@ export class State {
 		const state = this.getCurrentState();
 		const parsedState: SaveNode[] = [];
 
+		console.log("save: ", state);
 		for (const node of state) {
 			const p = await this.stringifyNode(node);
 			parsedState.push(p);
@@ -111,10 +118,12 @@ export class State {
 	}
 
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
+		// NOTE: ONE OF THE STATES DOESN'T GET DELETED ON LOAD
 		this.currentState.splice(0, this.currentState.length);
 		this.history.splice(0, this.history.length);
 		this.historyPointer = 0;
 
+		console.log("load: ", this.currentState, this.history);
 		for (const node of nodes) {
 			this.currentState.push(await this.parseNode(node));
 		}
@@ -173,8 +182,9 @@ export class State {
 					break;
 				}
 				case "bg": {
-					const url: string = attr.image.src;
-					const img = await loadImage(url);
+					console.log("initializing image:", attr);
+					const base64: string = attr.image.src;
+					const img = await loadKonvaImageFromBase64(base64);
 					stage.width(img.width());
 					stage.height(img.height());
 					mainLayer.add(img);
