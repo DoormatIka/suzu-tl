@@ -44,35 +44,43 @@
   }
 </script>
 
-<div>
-  <form on:submit={changeImage}>
-    <input type="text" name="imagelink" id="imagelink">
-    <button type="submit">Submit</button>
-  </form>
+<div class="w-80 py-2">
+  <div>
+    <p>Input image</p>
+    <form class="flex gap-2" on:submit={changeImage}>
+      <input class="flex-1" type="text" name="imagelink" id="imagelink">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <br>
+
+  <div class="flex gap-2">
+    <button class="flex-1" on:click={undo}>Undo</button>
+    <button class="flex-1" on:click={redo}>Redo</button>
+    <button class="flex-1" on:click={() => { state.pushText(0, 0); }}>Add</button>
+  </div>
+
+  <br>
+
+  <div class="flex gap-2 flex-row h-6 items-center">
+    <button  on:click={zoomIn} class="flex-1 h-full">Zoom +</button>
+    <p style="padding: 0px 1em 0px 1em;">{scale}x</p>
+    <button on:click={zoomOut} class="flex-1 h-full">Zoom -</button>
+  </div>
+
+  <br>
+
+  <div class="flex flex-col items-center gap-2">
+    <div class="w-full">
+      <textarea class="w-full" name="save" id="save">{saveContent}</textarea>
+    </div>
+    <div class="flex w-full gap-2">
+      <button on:click={save} class="flex-1 h-full">Save</button>
+      <button on:click={load} class="flex-1 h-full">Load</button>
+    </div>
+  </div>
 </div>
 
-<br>
 
-<div>
-  <button on:click={undo}>Undo</button>
-  <button on:click={redo}>Redo</button>
-  <button on:click={() => { state.pushText(0, 0); }}>Add</button>
-</div>
-
-<br>
-
-<div style="width: 15rem; flex-direction: row; display: flex; height: 1.5em; align-items: center;">
-  <button on:click={zoomIn} style="flex-grow: 1; height: 100%;">Zoom +</button>
-  <p style="padding: 0px 1em 0px 1em;">{scale}x</p>
-  <button on:click={zoomOut} style="flex-grow: 1; height: 100%;">Zoom -</button>
-</div>
-
-<br>
-
-<div style="align-items: center; flex-direction: row; display: flex; width: 20rem">
-  <textarea style="flex-grow: 1;" name="save" id="save">{saveContent}</textarea>
-  <button on:click={save} style="height: 100%;">Save</button>
-  <button on:click={load} style="height: 100%;">Load</button>
-</div>
-
-<div id="container" style="border: dotted; width: fit-content;"></div>
+<div id="container" class="border-dotted w-fit"></div>

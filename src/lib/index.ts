@@ -152,13 +152,13 @@ export class Orchestra {
 	}
 	public zoomIn() {
 		const maxScale = 1; // Define a maximum zoom level
-    const scaleX = Math.min(precisionRoundMod(this.stage.scaleX() + 0.1, 1), maxScale);
+		const scaleX = Math.min(precisionRoundMod(this.stage.scaleX() + 0.1, 1), maxScale);
 		this.stage.scaleX(scaleX);
 		this.stage.scaleY(scaleX);
 	}
 	public zoomOut() {
 		const minScale = 0.1; // Define a minimum zoom level
-    const scaleX = Math.max(precisionRoundMod(this.stage.scaleX() - 0.1, 1), minScale);
+		const scaleX = Math.max(precisionRoundMod(this.stage.scaleX() - 0.1, 1), minScale);
 		this.stage.scaleX(scaleX);
 		this.stage.scaleY(scaleX);
 	}

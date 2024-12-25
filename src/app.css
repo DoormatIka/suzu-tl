@@ -1,0 +1,16 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+button {
+  @apply btn btn-outline;
+}
+
+input {
+  @apply input input-bordered;
+}
+
+textarea {
+  @apply textarea textarea-bordered;
+}
