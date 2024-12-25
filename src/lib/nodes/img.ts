@@ -3,8 +3,6 @@ import Konva from "konva";
 export async function loadKonvaImageFromURL(url: string): Promise<Konva.Image> {
 	const base64 = await convertURLToBase64(url);
 	const img = await loadKonvaImageFromBase64(base64);
-	img.name("bg");
-	img.id("bg");
 	return img;
 }
 
@@ -35,6 +33,8 @@ export async function loadKonvaImageFromBase64(base64: string): Promise<Konva.Im
 		imageObj.src = base64;
 		imageObj.onload = () => {
 			const yoda = new Konva.Image({image: imageObj});
+			yoda.name("bg");
+			yoda.id("bg");
 			res(yoda);
 		};
 		imageObj.onerror = (err) => {rej(err)}

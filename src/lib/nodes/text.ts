@@ -30,7 +30,7 @@ export class TextBox {
 
 		const areaPosition = {
 			x: stageBox.left + textPosition.x,
-			y: Math.abs(stageBox.top) + window.scrollY + textPosition.y,
+			y: Math.abs(stageBox.y + window.scrollY) + textPosition.y,
 		};
 
 		const textarea = document.createElement("textarea");
@@ -41,7 +41,7 @@ export class TextBox {
 		textarea.style.left = areaPosition.x + "px";
 		textarea.style.top = areaPosition.y + "px";
 		textarea.style.width = textNode.width().toString();
-		textarea.style.fontSize = `${textNode.fontSize()}px`;
+		textarea.style.fontSize = `${textNode.fontSize() * (stage.scaleX() / 1.5)}px`;
 
 		textarea.focus();
 

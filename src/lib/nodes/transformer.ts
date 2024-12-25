@@ -1,6 +1,6 @@
 import Konva from "konva";
 import type { CloseButton } from "./closebutton";
-import { MAX_TEXT_WIDTH } from "$lib/constants";
+import { MIN_TEXT_WIDTH } from "$lib/constants";
 
 export class TTransformer {
 	private transformer: Konva.Transformer;
@@ -48,7 +48,7 @@ export class TTransformer {
 			) {
 				let newFontSize = node.fontSize() * newScaleY;
 				let newWidth = node.width() * newScaleY;
-				if (newWidth > MAX_TEXT_WIDTH) {
+				if (newWidth > MIN_TEXT_WIDTH * newScaleX) {
 					node.fontSize(newFontSize);
 					node.width(newWidth);
 				}
