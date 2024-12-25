@@ -60,7 +60,6 @@ export class State {
 	}
 
 	public undo() {
-		console.log("undo", this.currentState);
 		if (this.historyPointer > 0) {
 			this.historyPointer--;
 			this.currentState = this.history[this.historyPointer].slice();
@@ -69,7 +68,6 @@ export class State {
 		return this.currentState;
 	}
 	public redo() {
-		console.log("redo", this.currentState);
 		if (this.historyPointer < this.history.length - 1) {
 			this.historyPointer++;
 			this.currentState = this.history[this.historyPointer].slice();
@@ -86,7 +84,6 @@ export class State {
 		const state = this.getCurrentState();
 		const parsedState: SaveNode[] = [];
 
-		console.log("save: ", state);
 		for (const node of state) {
 			const p = await this.stringifyNode(node);
 			parsedState.push(p);
@@ -118,12 +115,10 @@ export class State {
 	}
 
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
-		// NOTE: ONE OF THE STATES DOESN'T GET DELETED ON LOAD
 		this.currentState.splice(0, this.currentState.length);
 		this.history.splice(0, this.history.length);
 		this.historyPointer = 0;
 
-		console.log("load: ", this.currentState, this.history);
 		for (const node of nodes) {
 			this.currentState.push(await this.parseNode(node));
 		}
@@ -137,6 +132,7 @@ export class State {
 			
 			return {
 				"name": "bg",
+				"id": "bg",
 				"x": 0,
 				"y": 0,
 				"image": elem,
@@ -182,7 +178,6 @@ export class State {
 					break;
 				}
 				case "bg": {
-					console.log("initializing image:", attr);
 					const base64: string = attr.image.src;
 					const img = await loadKonvaImageFromBase64(base64);
 					stage.width(img.width());
