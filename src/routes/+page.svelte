@@ -39,24 +39,13 @@
   function redo() {
     state.redo();
   }
-  function zoomIn() {
-    state.zoomIn();
-    scale = state.getScale();
-  }
-  function zoomOut() {
-    state.zoomOut();
-    scale = state.getScale();
-  }
 </script>
 
 
 <div class="flex flex-row items-center gap-3">
   <button class="flex-1" on:click={undo}>Undo</button>
   <button class="flex-1" on:click={redo}>Redo</button>
-
-  <button on:click={zoomIn} class="flex-1 h-full">Zoom +</button>
   <p style="padding: 0px 1em 0px 1em;">{scale}x</p>
-  <button on:click={zoomOut} class="flex-1 h-full">Zoom -</button>
 </div>
 
 <br>

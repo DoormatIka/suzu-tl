@@ -9,6 +9,7 @@ import {
 	TRANSFORMER,
 	MIN_TEXT_WIDTH,
 	DEFAULT_TEXT_CONFIG,
+	GROUP_MAIN,
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
 import { State } from "./nodes/state";
@@ -61,7 +62,6 @@ export class Orchestra {
 			boundBoxFunc: (oldBox, newBox) => {
 				const t = this.transformer.getTransformer();
 				const stage = t.getStage()!;
-				console.log(stage.scaleX());
 				
 				if (Math.abs(newBox.width) < MIN_TEXT_WIDTH * stage.scaleX()) {
 					return oldBox;
@@ -82,6 +82,7 @@ export class Orchestra {
 			}
 			this.pushText(e.evt.layerX, e.evt.layerY);
 		});
+		this.stage.on("wheel", (e) => { this.zoom(e); })
 		this.stage.on("click tap", (e) => {
 			const tr = this.transformer;
 			if (["Image"].includes(e.target.getClassName())) {
@@ -111,6 +112,41 @@ export class Orchestra {
 			this.closeButton.show();
 			this.workLayer.draw();
 		});
+	}
+	private zoom(e: Konva.KonvaEventObject<WheelEvent>) {
+		e.evt.preventDefault();
+		const scaleBy = 1.1;
+
+		var oldScale = this.stage.scaleX();
+		var pointer = this.stage.getPointerPosition();
+		if (!pointer) {
+			return;
+		}
+
+		var mousePointTo = {
+			x: (pointer.x - this.stage.x()) / oldScale,
+			y: (pointer.y - this.stage.y()) / oldScale,
+		};
+
+		// how to scale? Zoom in? Or zoom out?
+		let direction = e.evt.deltaY > 0 ? 1 : -1;
+
+		// when we zoom on trackpad, e.evt.ctrlKey is true
+		// in that case lets revert direction
+		if (e.evt.ctrlKey) {
+			direction = -direction;
+		}
+
+		var newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+		this.stage.scale({ x: newScale, y: newScale });
+
+		var newPos = {
+			x: pointer.x - mousePointTo.x * newScale,
+			y: pointer.y - mousePointTo.y * newScale,
+		};
+		this.stage.position(newPos);
+		this.closeButton.updateDeletePosition();
 	}
 
 	public async loadImage(url: string) {
@@ -159,18 +195,6 @@ export class Orchestra {
 		this.state.refreshStage(this.stage, s);
 		this.transformer.nodes([]);
 		this.closeButton.hide();
-	}
-	public zoomIn() {
-		const maxScale = 1; // Define a maximum zoom level
-		const scaleX = Math.min(precisionRoundMod(this.stage.scaleX() + 0.1, 1), maxScale);
-		this.stage.scaleX(scaleX);
-		this.stage.scaleY(scaleX);
-	}
-	public zoomOut() {
-		const minScale = 0.1; // Define a minimum zoom level
-		const scaleX = Math.max(precisionRoundMod(this.stage.scaleX() - 0.1, 1), minScale);
-		this.stage.scaleX(scaleX);
-		this.stage.scaleY(scaleX);
 	}
 	public getScale() {
 		return this.stage.scaleX();
