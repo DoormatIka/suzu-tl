@@ -80,7 +80,10 @@ export class Orchestra {
 			if (["Text", "Circle", "Stage"].includes(e.target.getClassName())) {
 				return;
 			}
-			this.pushText(e.evt.layerX, e.evt.layerY);
+			const stageTransform = this.stage.getAbsoluteTransform();
+			const invertedTransform = stageTransform.copy().invert();
+			const pointer = invertedTransform.point({ x: e.evt.layerX, y: e.evt.layerY });
+			this.pushText(pointer.x, pointer.y);
 		});
 		this.stage.on("wheel", (e) => { this.zoom(e); })
 		this.stage.on("click tap", (e) => {
