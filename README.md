@@ -12,7 +12,6 @@ A tool that will be used by SmallScans to place which translated text belongs in
 - [ ] Tabs
 - [ ] Saving/Loading
 - [ ] Live server
-
 - [ ] UI - lackluster.
 
 ## Example
