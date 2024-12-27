@@ -20,7 +20,21 @@ export class TextBox {
 	}
 	private on() {
 		this.text.on("dblclick dbltap", (e) => this.doubleClick(e));
-		this.text.on("dragend", (e) => this.state.updateNode(this.text));
+		this.text.on("dragmove", (e) => {
+			const stage = e.target.getStage()!;
+			const stageBox = stage.container().getBoundingClientRect();
+			const stageTransform = stage.getAbsoluteTransform();
+			const invertedTransform = stageTransform.copy().invert();
+			const textAbsPos = this.text.absolutePosition();
+			const relativePost = invertedTransform.point(textAbsPos);
+
+			// doesn't work.
+			const clampedX = Math.max(0, Math.min(relativePost.x, stageBox.x + stageBox.right));
+			const clampedY = Math.max(0, Math.min(relativePost.y, stageBox.y + stageBox.bottom));
+			this.text.x(clampedX);
+			this.text.y(clampedY);
+		})
+		this.text.on("dragend", (e) => {this.state.updateNode(this.text)});
 	}
 	private doubleClick(e: Konva.KonvaEventObject<Konva.Text>) {
 		const textNode = this.text;

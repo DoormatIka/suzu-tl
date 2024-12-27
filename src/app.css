@@ -3,10 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-button {
-  @apply btn btn-outline;
-}
-
 input {
   @apply input input-bordered;
 }
