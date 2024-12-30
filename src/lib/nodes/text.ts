@@ -21,6 +21,7 @@ export class TextBox {
 	private on() {
 		this.text.on("dblclick dbltap", (e) => this.doubleClick(e));
 		this.text.on("dragmove", (e) => {
+			/*
 			const stage = e.target.getStage()!;
 			const stageBox = stage.container().getBoundingClientRect();
 			const stageTransform = stage.getAbsoluteTransform();
@@ -33,6 +34,7 @@ export class TextBox {
 			const clampedY = Math.max(0, Math.min(relativePost.y, stageBox.y + stageBox.bottom));
 			this.text.x(clampedX);
 			this.text.y(clampedY);
+			*/
 		})
 		this.text.on("dragend", (e) => {this.state.updateNode(this.text)});
 	}
@@ -50,12 +52,14 @@ export class TextBox {
 		const textarea = document.createElement("textarea");
 		document.body.appendChild(textarea);
 
+		const fontSize = Math.min(textNode.fontSize() * (stage.scaleX() / 1.5), 30);
+
 		textarea.value = textNode.text();
 		textarea.style.position = "absolute";
 		textarea.style.left = areaPosition.x + "px";
 		textarea.style.top = areaPosition.y + "px";
 		textarea.style.width = textNode.width().toString();
-		textarea.style.fontSize = `${textNode.fontSize() * (stage.scaleX() / 1.5)}px`;
+		textarea.style.fontSize = `${fontSize}px`;
 
 		textarea.focus();
 

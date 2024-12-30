@@ -2,7 +2,6 @@ import { DEFAULT_TEXT_CONFIG, LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
 import {loadKonvaImageFromBase64, loadKonvaImageFromURL} from "./img";
-import type {NodeConfig} from "konva/lib/Node";
 
 type SaveNode = SaveText | SaveBG;
 type SaveText = {
@@ -76,7 +75,7 @@ export class State {
 		return this.currentState;
 	}
 
-	public getCurrentState(): NodeConfig[] {
+	public getCurrentState(): Konva.NodeConfig[] {
 		return this.history[this.historyPointer];
 	}
 
@@ -114,6 +113,14 @@ export class State {
 		throw new Error("Unknown type found!");
 	}
 
+	public loadStateFromNodeConfig(stage: Konva.Stage, nodes: Konva.NodeConfig[]) {
+		this.currentState.splice(0, this.currentState.length);
+		this.history.splice(0, this.history.length);
+		this.historyPointer = 0;
+
+		this.currentState.push(nodes);
+		this.refreshStage(stage, this.currentState);
+	}
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
 		this.currentState.splice(0, this.currentState.length);
 		this.history.splice(0, this.history.length);

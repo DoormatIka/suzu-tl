@@ -9,11 +9,16 @@ import {
 	TRANSFORMER,
 	MIN_TEXT_WIDTH,
 	DEFAULT_TEXT_CONFIG,
-	GROUP_MAIN,
 } from "./constants";
 import { TTransformer } from "./nodes/transformer";
 import { State } from "./nodes/state";
 import {loadKonvaImageFromURL} from "./nodes/img";
+
+export async function createOrchestra() {
+    const state = new Orchestra();
+    state.setStageClick();
+	return state;
+}
 
 export class Orchestra {
 	private stage: Konva.Stage;
@@ -27,8 +32,8 @@ export class Orchestra {
 	constructor(id?: string) {
 		this.stage = new Konva.Stage({
 			container: id ?? "container",
-			width: 100,
-			height: 100,
+			width: 800,
+			height: 800,
 		});
 		this.mainLayer = new Konva.Layer({ name: LAYER_MAIN });
 		this.workLayer = new Konva.Layer({ name: LAYER_WORK });
@@ -158,18 +163,13 @@ export class Orchestra {
 		);
 		const c = work_layer_children.at(0);
 		if (c) {
-			this.mainLayer.clear();
+			this.mainLayer.removeChildren();
 			this.transformer.nodes([]);
 		}
 
 		const img = await loadKonvaImageFromURL(url);
 
-		this.stage.width(img.width());
-		this.stage.height(img.height());
-
 		this.mainLayer.add(img);
-		this.mainLayer.draw();
-
 		this.state.updateNode(img);
 	}
 	public pushText(x: number, y: number) {
@@ -203,12 +203,18 @@ export class Orchestra {
 		return this.stage.scaleX();
 	}
 
+	public async loadNodeConfig(s: Konva.NodeConfig[]) {
+		return this.state.loadStateFromNodeConfig(this.stage, s);
+	}
 	public async load(str: string) {
 		const j = JSON.parse(str);
 		return await this.state.loadStateFromJSON(this.stage, j);
 	}
 	public save() {
 		return this.state.saveStateToJSON();
+	}
+	public getState() {
+		return this.state.getCurrentState();
 	}
 }
 

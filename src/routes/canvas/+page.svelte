@@ -1,18 +1,21 @@
 <script lang="ts">
-  import {Orchestra} from "$lib/index.js";
+  import {createOrchestra, Orchestra} from "$lib/index.js";
+    import {getCurrentTab} from "$lib/stores/tabs";
   import {onMount} from "svelte";
   let state: Orchestra;
-  let scale = 0;
   let saveContent = "";
   let errGlobal = "";
 
+  const k = getCurrentTab();
   onMount(async () => {
-    state = new Orchestra();
-    state.setStageClick();
-    await state.loadImage("https://images-ext-1.discordapp.net/external/j_0a_sMO9wIlnUS3S_2F98Xd57v6if9DoHqjZ32Jmk8/https/pbs.twimg.com/media/Ge6MO7qbAAAinSx.jpg%3Alarge?format=webp&width=670&height=670")
-      .catch((err) => errGlobal = err);
-    scale = state.getScale();
-  })
+    state = await createOrchestra();
+    k.subscribe(async (v) => {
+      // doesn't update when clicking on tabs.
+      console.log("updated!");
+      await state.loadNodeConfig(v);
+    });
+  });
+
   async function changeImage(e: SubmitEvent & {currentTarget: EventTarget & HTMLFormElement}) {
     if (!e.target)
       return;
@@ -49,7 +52,6 @@
 <div class="flex flex-row items-center gap-3">
   <button class="flex-1 btn btn-outline" on:click={undo}>Undo</button>
   <button class="flex-1 btn btn-outline" on:click={redo}>Redo</button>
-  <p style="padding: 0px 1em 0px 1em;">{scale}x</p>
 </div>
 
 <br>
