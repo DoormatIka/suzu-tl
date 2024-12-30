@@ -10,9 +10,9 @@
   onMount(async () => {
     state = await createOrchestra();
     k.subscribe(async (v) => {
+      if (!v) { return; }
       // doesn't update when clicking on tabs.
-      console.log("updated!");
-      await state.loadNodeConfig(v);
+      await state.loadNodeConfig(v.state);
     });
   });
 
