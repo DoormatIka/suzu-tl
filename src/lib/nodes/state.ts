@@ -81,6 +81,7 @@ export class State {
 
 	public async saveStateToJSON() {
 		const state = this.getCurrentState();
+		console.log("save: ", state);
 		const parsedState: SaveNode[] = [];
 
 		for (const node of state) {
@@ -132,10 +133,8 @@ export class State {
 		for (const node of nodes) {
 			this.currentState.push(node);
 		}
-
-		// this.currentState is somehow a [[{node}, {node}]], instead of a [{node}, {node}]
-		// pls check.
 		this.refreshStage(stage, this.currentState);
+		this.saveStateToHistory(this.currentState.slice());
 	}
 
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
@@ -147,6 +146,7 @@ export class State {
 			this.currentState.push(await this.parseNode(node));
 		}
 		this.refreshStage(stage, this.currentState);
+		this.saveStateToHistory(this.currentState.slice());
 	}
 	private async parseNode(
 		node: SaveNode

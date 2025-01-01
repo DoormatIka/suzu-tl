@@ -1,16 +1,12 @@
-import type Konva from "konva";
-import {writable} from "svelte/store";
+import type {Tab, TabStore} from "$lib/constants";
 
-const tab = writable<{id: string, state: Konva.NodeConfig[]}>();
-
-export function setCurrentTab(state: {id: string, state: Konva.NodeConfig[]}) {
+export function setCurrentTab(tab: TabStore, state: Tab | undefined) {
 	tab.update((current) => {
-        if (!current || current.id !== state.id) {
-            return state;
-        }
+		if (state) {
+		  if (!current || current.id !== state.id) {
+			return state;
+		  }
+		}
         return current;
     });
-}
-export function getCurrentTab() {
-	return tab;
 }

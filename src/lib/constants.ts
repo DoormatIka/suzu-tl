@@ -1,3 +1,9 @@
+import type Konva from "konva";
+import type {Writable} from "svelte/store";
+
+export type Tab = {id: string, state: Konva.NodeConfig[]};
+export type TabStore = Writable<Tab | undefined>;
+
 export const LAYER_MAIN = "main";
 export const LAYER_WORK = "work";
 export const GROUP_MAIN = "grp_main";
