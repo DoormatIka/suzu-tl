@@ -1,22 +1,22 @@
 import { DEFAULT_TEXT_CONFIG, LAYER_MAIN } from "$lib/constants";
 import Konva from "konva";
 import { TextBox } from "./text";
-import {loadKonvaImageFromBase64, loadKonvaImageFromURL} from "./img";
+import { loadKonvaImageFromBase64, loadKonvaImageFromURL } from "./img";
 
 type SaveNode = SaveText | SaveBG;
 type SaveText = {
-	type: "text"
-	x: number,
-	y: number,
-	width: number,
-	text: string,
-	fontSize: number,
+	type: "text";
+	x: number;
+	y: number;
+	width: number;
+	text: string;
+	fontSize: number;
 };
 type SaveBG = {
-	type: "bg",
-	src: string,
-	width: number,
-	height: number,
+	type: "bg";
+	src: string;
+	width: number;
+	height: number;
 };
 
 /**
@@ -89,31 +89,42 @@ export class State {
 		}
 		return JSON.stringify(parsedState, undefined, 2);
 	}
-	private async stringifyNode(node: Konva.ImageConfig | Konva.TextConfig): Promise<SaveNode> {
+	private async stringifyNode(
+		node: Konva.ImageConfig | Konva.TextConfig
+	): Promise<SaveNode> {
 		if (node.image) {
 			const img = node as Konva.ImageConfig;
 			return {
-				"type": "bg",
-				"width": img.width!,
-				"height": img.height!,
-				"src": node.image.src,
+				type: "bg",
+				width: img.width!,
+				height: img.height!,
+				src: node.image.src,
 			};
 		}
 		if (node.text) {
 			const text = node as Konva.TextConfig;
 			return {
-				"type": "text",
-				"x": text.x!,
-				"y": text.y!,
-				"text": text.text!,
-				"width": text.width!,
-				"fontSize": text.fontSize!,
+				type: "text",
+				x: text.x!,
+				y: text.y!,
+				text: text.text!,
+				width: text.width!,
+				fontSize: text.fontSize!,
 			};
 		}
 		throw new Error("Unknown type found!");
 	}
 
-	public loadStateFromNodeConfig(stage: Konva.Stage, nodes: Konva.NodeConfig[]) {
+	public loadStateFromNodeConfig(
+		stage: Konva.Stage,
+		nodes: Konva.NodeConfig[]
+	) {
+		console.log("nodes:", nodes);
+
+		if (!Array.isArray(nodes)) {
+			throw new TypeError("nodes is not an array");
+		}
+
 		this.currentState.splice(0, this.currentState.length);
 		this.history.splice(0, this.history.length);
 		this.historyPointer = 0;
@@ -121,10 +132,12 @@ export class State {
 		for (const node of nodes) {
 			this.currentState.push(node);
 		}
+
 		// this.currentState is somehow a [[{node}, {node}]], instead of a [{node}, {node}]
 		// pls check.
 		this.refreshStage(stage, this.currentState);
 	}
+
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
 		this.currentState.splice(0, this.currentState.length);
 		this.history.splice(0, this.history.length);
@@ -135,32 +148,34 @@ export class State {
 		}
 		this.refreshStage(stage, this.currentState);
 	}
-	private async parseNode(node: SaveNode): Promise<Konva.ImageConfig | Konva.TextConfig> {
+	private async parseNode(
+		node: SaveNode
+	): Promise<Konva.ImageConfig | Konva.TextConfig> {
 		if (node.type === "bg") {
 			const img = node as SaveBG;
 			const elem = new Image(img.width, img.height);
 			elem.src = structuredClone(node.src);
-			
+
 			return {
-				"name": "bg",
-				"id": "bg",
-				"x": 0,
-				"y": 0,
-				"image": elem,
-				"width": img.width!,
-				"height": img.height!,
+				name: "bg",
+				id: "bg",
+				x: 0,
+				y: 0,
+				image: elem,
+				width: img.width!,
+				height: img.height!,
 			};
 		}
 		if (node.type === "text") {
 			const text = node as SaveText;
 			return {
 				...DEFAULT_TEXT_CONFIG,
-				"name": "text",
-				"x": text.x!,
-				"y": text.y!,
-				"text": text.text!,
-				"width": text.width!,
-				"fontSize": text.fontSize!,
+				name: "text",
+				x: text.x!,
+				y: text.y!,
+				text: text.text!,
+				width: text.width!,
+				fontSize: text.fontSize!,
 			};
 		}
 		throw new Error("Unknown type found!");
@@ -210,4 +225,3 @@ export class State {
 		return txt;
 	}
 }
-
