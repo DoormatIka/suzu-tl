@@ -24,8 +24,9 @@
     currentTabIndex = index;
     // might be because states rely on the pointer changing instead of the value
     // meaning changing indices probably doesn't update this.
+
+    // UPDATE: the above issue has been fixed by using uuids
     setCurrentTab(tabs[index]);
-    console.log(index);
   }
 </script>
 

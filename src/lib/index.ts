@@ -32,8 +32,8 @@ export class Orchestra {
 	constructor(id?: string) {
 		this.stage = new Konva.Stage({
 			container: id ?? "container",
-			width: 800,
-			height: 800,
+			width: window.innerWidth / 1.5,
+			height: window.innerHeight / 1.5,
 		});
 		this.mainLayer = new Konva.Layer({ name: LAYER_MAIN });
 		this.workLayer = new Konva.Layer({ name: LAYER_WORK });

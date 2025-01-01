@@ -118,7 +118,11 @@ export class State {
 		this.history.splice(0, this.history.length);
 		this.historyPointer = 0;
 
-		this.currentState.push(nodes);
+		for (const node of nodes) {
+			this.currentState.push(node);
+		}
+		// this.currentState is somehow a [[{node}, {node}]], instead of a [{node}, {node}]
+		// pls check.
 		this.refreshStage(stage, this.currentState);
 	}
 	public async loadStateFromJSON(stage: Konva.Stage, nodes: any[]) {
@@ -171,6 +175,7 @@ export class State {
 		const layers = stage.children;
 		const mainLayerIndex = layers.findIndex((c) => c.name() === LAYER_MAIN);
 		if (mainLayerIndex === -1) {
+			console.warn("Could not find the main layer!");
 			return;
 		}
 
@@ -193,6 +198,7 @@ export class State {
 					break;
 				}
 				default:
+					console.log("Unknown state value passed.");
 					break;
 			}
 		}

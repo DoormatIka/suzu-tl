@@ -6,12 +6,12 @@
   let saveContent = "";
   let errGlobal = "";
 
-  const k = getCurrentTab();
   onMount(async () => {
+    const k = getCurrentTab();
     state = await createOrchestra();
     k.subscribe(async (v) => {
       if (!v) { return; }
-      // doesn't update when clicking on tabs.
+      // doesn't update when clicking on tabs, unless you make a tiny change in the code?
       await state.loadNodeConfig(v.state);
     });
   });
